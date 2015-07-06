@@ -1,0 +1,36 @@
+{
+  "name": "tentwofour/ical",
+  "type": "library",
+  "description": "Provides easy, OO-based iCal generation.",
+  "keywords": [
+    "ten24",
+    "tentwofour",
+    "iCal"
+  ],
+  "homepage": "https://github.com/tentwofour/ics",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Blair D. Patterson",
+      "homepage": "http://tentwentyfour.ca",
+      "email": "blair@tentwentyfour.ca"
+    }
+  ],
+  "require": {
+    "php": ">=5.3.3",
+    "doctrine/common": "2.5.0"
+  },
+  "require-dev": {
+  },
+  "minimum-stability": "stable",
+  "autoload": {
+    "psr-0": {
+      "Ten24\\": "src/"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0.x-dev"
+    }
+  }
+}
