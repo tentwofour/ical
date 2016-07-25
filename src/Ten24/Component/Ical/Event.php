@@ -337,7 +337,7 @@ class Event extends Base
      */
     public function getFormattedCreated()
     {
-        return $this->created->format(static::DATEFORMAT);
+        return $this->getCreated()->format(static::DATEFORMAT);
     }
 
     /**
@@ -655,4 +655,4 @@ class Event extends Base
         }
 
     }
-}
+}cd
