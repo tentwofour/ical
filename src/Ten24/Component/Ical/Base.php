@@ -16,5 +16,12 @@ class Base
      *
      * @var string
      */
-    const DATEFORMAT = 'Ymd\THis\Z';
+    const DATEFORMAT = 'Ymd\THis';
+
+    /**
+     * Date format UTC
+     *
+     * @var string
+     */
+    const DATEFORMAT_UTC = 'Ymd\THis\Z';
 }

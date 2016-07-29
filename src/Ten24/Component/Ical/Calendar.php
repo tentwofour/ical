@@ -82,12 +82,13 @@ class Calendar extends Base
         $this->setTimezoneId($tz);
 
         // Create a new \DateTime in the default timezone
-        $t = new \DateTimeZone($this->getTimezoneId());
-        $d = new \DateTime('now', $t);
+        $t        = new \DateTimeZone($this->getTimezoneId());
+        $d        = new \DateTime('now', $t);
+        $polarity = ($t->getOffset($d) / 3600 === 0) ? '' : ($t->getOffset($d) / 3600 < 0) ? '-' : '+';
 
         $this->setTimezoneName($d->format('T'));
-        $this->setTimezoneOffsetStart($t->getOffset($d));
-        $this->setTimezoneOffsetEnd($t->getOffset($d));
+        $this->setTimezoneOffsetStart($polarity . gmdate('hi', $t->getOffset($d)));
+        $this->setTimezoneOffsetEnd($polarity . gmdate('hi', $t->getOffset($d)));
         $this->events = new ArrayCollection();
 
         return $this;
@@ -108,11 +109,12 @@ class Calendar extends Base
                    . static::ICS_EOL
                    . "METHOD:{$this->getMethod()}"
                    . static::ICS_EOL
-                   . "X-WR-TIMEZONE:{$this->getFormattedTimezoneId()}"
+                   // Non-standard field
+                   . "X-WR-TIMEZONE:{$this->getTimezoneId()}"
                    . static::ICS_EOL
                    . "BEGIN:VTIMEZONE"
                    . static::ICS_EOL
-                   . "TZID:{$this->getFormattedTimezoneId()}"
+                   . "TZID:{$this->getTimezoneId()}"
                    . static::ICS_EOL
                    . "BEGIN:STANDARD"
                    . static::ICS_EOL
@@ -337,7 +339,7 @@ class Calendar extends Base
     /**
      * Saves the current data to the specified file.
      *
-     * @param string $file
+     * @param string $filename
      *
      * @return boolean
      */

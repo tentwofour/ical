@@ -7,32 +7,25 @@ use Doctrine\Common\Collections\ArrayCollection;
 class Event extends Base
 {
     /**
-     * Event Status CANCELLED
-     *
-     * @var string
-     */
-    const STATUS_CANCELLED = 'CANCELLED';
-
-    /**
      * Event Status COMPLETED
      *
      * @var string
      */
-    const STATUS_COMPLETED = 'COMPLETED';
+    const STATUS_TENTATIVE = 'TENTATIVE';
 
     /**
      * Event Status IN-PROCESS
      *
      * @var string
      */
-    const STATUS_IN_PROCESS = 'IN-PROCESS';
+    const STATUS_CONFIRMED = 'CONFIRMED';
 
     /**
-     * Event Status NEEDS-ACTION
+     * Event Status CANCELLED
      *
      * @var string
      */
-    const STATUS_NEEDS_ACTION = 'NEEDS-ACTION';
+    const STATUS_CANCELLED = 'CANCELLED';
 
     /**
      * Event Class CONFIDENTIAL
@@ -73,10 +66,9 @@ class Event extends Base
      * @var array
      */
     private $statuses = [
-        self::STATUS_CANCELLED,
-        self::STATUS_COMPLETED,
-        self::STATUS_IN_PROCESS,
-        self::STATUS_NEEDS_ACTION,
+        self::STATUS_TENTATIVE,
+        self::STATUS_CONFIRMED,
+        self::STATUS_CANCELLED
     ];
 
     /**
@@ -212,7 +204,7 @@ class Event extends Base
 
         if ($endDate instanceof \DateTime)
         {
-            $this->setEndDate($startDate);
+            $this->setEndDate($endDate);
         }
 
         $this->setAttendees((null !== $attendees && $attendees instanceof ArrayCollection)
@@ -239,7 +231,8 @@ class Event extends Base
                    . static::ICS_EOL
                    . "DTEND:{$this->getFormattedEndDate()}"
                    . static::ICS_EOL
-                   . "DTSTAMP:{$this->getFormattedCreated()}"
+                   // Must be in UTC
+                   . "DTSTAMP:{$this->getCreated()->format('Ymd\THis\Z')}"
                    . static::ICS_EOL
                    . "ORGANIZER;CN={$this->getFromName()}:mailto:{$this->getFromEmail()}"
                    . static::ICS_EOL;
@@ -263,7 +256,8 @@ class Event extends Base
                     . static::ICS_EOL
                     . "STATUS:{$this->getStatus()}"
                     . static::ICS_EOL
-                    . "LAST-MODIFIED:{$this->getFormattedStartDate()}"
+                    // Must be in UTC
+                    . "LAST-MODIFIED:{$this->getStartDate()->format('Ymd\THis\Z')}"
                     . static::ICS_EOL
                     . "CLASS:{$this->getClass()}"
                     . static::ICS_EOL
@@ -337,7 +331,7 @@ class Event extends Base
      */
     public function getFormattedCreated()
     {
-        return $this->getCreated()->format(static::DATEFORMAT);
+        return $this->getCreated()->format(static::DATEFORMAT_UTC);
     }
 
     /**
@@ -558,7 +552,7 @@ class Event extends Base
      */
     public function getStatus()
     {
-        return null === $this->status ? self::STATUS_NEEDS_ACTION : $this->status;
+        return null === $this->status ? self::STATUS_TENTATIVE : $this->status;
     }
 
     /**
@@ -568,7 +562,7 @@ class Event extends Base
      */
     public function setStatus($status)
     {
-        $this->status = (!in_array($status, $this->statuses)) ? self::STATUS_NEEDS_ACTION : $status;
+        $this->status = (!in_array($status, $this->statuses)) ? self::STATUS_TENTATIVE : $status;
 
         return $this;
     }
@@ -645,11 +639,11 @@ class Event extends Base
     {
         $c = new \ReflectionClass('\Ten24\Component\Ical\Event');
 
-        foreach($c->getProperties() as $property)
+        foreach ($c->getProperties() as $property)
         {
             if (isset($event[$property->getName()]))
             {
-                $method = 'set'.ucfirst($property->getName());
+                $method = 'set' . ucfirst($property->getName());
                 $this->$method($event[$property->getName()]);
             }
         }
